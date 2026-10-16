@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <chrono>
+#include <vector>
 
 int number_bacteria;
 char** bacteria_name;
@@ -260,22 +262,66 @@ double CompareBacteria(Bacteria* b1, Bacteria* b2)
 
 void CompareAllBacteria()
 {
-	Bacteria** b = new Bacteria*[number_bacteria];
-    for(int i=0; i<number_bacteria; i++)
-	{
-		printf("load %d of %d\n", i+1, number_bacteria);
-		b[i] = new Bacteria(bacteria_name[i]);
-	}
+	using Clock = std::chrono::steady_clock;
 
-    for(int i=0; i<number_bacteria-1; i++)
-		for(int j=i+1; j<number_bacteria; j++)
-		{
-			printf("%2d %2d -> ", i, j);
-			double correlation = CompareBacteria(b[i], b[j]);
-			printf("%.20lf\n", correlation);
-		}
+    int n = number_bacteria;
+    Bacteria** b = new Bacteria*[n];
 
-	for (int i = 0; i < number_bacteria; i++)
+    
+    std::vector<std::vector<double>> results(
+        n, std::vector<double>(n, 0.0)); // Only the entries with j > i will be used
+
+    const auto preparation_start = Clock::now();
+
+    // Stage 1: prepare each dataset's composition vector
+    for (int i = 0; i < n; i++)
+    {
+        b[i] = new Bacteria(bacteria_name[i]);
+    }
+
+    const auto preparation_end = Clock::now();
+
+    for (int i = 0; i < n; i++)
+        printf("load %d of %d\n", i + 1, n);
+
+    const auto comparison_start = Clock::now();
+
+    // Stage 2: calculate each unique pair
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = i + 1; j < n; j++)
+        {
+            results[i][j] = CompareBacteria(b[i], b[j]);
+        }
+    }
+
+    const auto comparison_end = Clock::now();
+
+    // Print in a fixed order after all calculations finish
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = i + 1; j < n; j++)
+        {
+            printf("%2d %2d -> %.20lf\n", i, j, results[i][j]);
+        }
+    }
+
+    const double preparation_seconds =
+        std::chrono::duration<double>(
+            preparation_end - preparation_start).count();
+
+    const double comparison_seconds =
+        std::chrono::duration<double>(
+            comparison_end - comparison_start).count();
+
+    printf("vector preparation: %.6f seconds\n",
+           preparation_seconds);
+
+    printf("pair comparisons: %.6f seconds\n",
+           comparison_seconds);
+
+
+	for (int i = 0; i < n; i++)
     	delete b[i];
 
 	delete[] b;
@@ -283,7 +329,8 @@ void CompareAllBacteria()
 
 int main(int argc,char * argv[])
 {
-	time_t t1 = time(NULL);
+	using Clock = std::chrono::steady_clock;
+    const auto start = Clock::now();
 
 	Init();
 	ReadInputFile("list.txt");
@@ -293,7 +340,11 @@ int main(int argc,char * argv[])
     	delete[] bacteria_name[i];
 	delete[] bacteria_name; //delete the array of filename pointers
 
-	time_t t2 = time(NULL);
-	printf("time elapsed: %lld seconds\n", t2 - t1); 
+	const auto end = Clock::now();
+
+    const double elapsed =
+        std::chrono::duration<double>(end - start).count();
+
+	printf("time elapsed: %.6f seconds\n", elapsed); 
 	return 0;
 }
