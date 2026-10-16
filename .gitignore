@@ -1,0 +1,7 @@
+/build/
+/results/
+*.exe
+*.obj
+*.pdb
+*.ilk
+/baseline_serial.txt

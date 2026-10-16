@@ -149,15 +149,17 @@ public:
 			if (stochastic > EPSILON) 
 			{
 				t[i] = (vector[i] - stochastic) / stochastic;
-				count++;
+
+				if (t[i] != 0) //onyl stores nonzero values
+					count++;
 			}
 			else
 				t[i] = 0;
 		}
 		
-		delete second_div_total;
-		delete vector;
-		delete second;
+		delete[] second_div_total;
+		delete[] vector;
+		delete[] second;
 
 		tv = new double[count];
 		ti = new long[count];
@@ -172,10 +174,16 @@ public:
 				pos++;
 			}
 		}
-		delete t;
+		delete[] t;
 
 		fclose (bacteria_file);
 	}
+
+	 ~Bacteria() //release sparse vectors when a Bacteria object is deleted
+    {
+        delete[] tv;
+        delete[] ti;
+    }
 };
 
 void ReadInputFile(const char* input_name)
@@ -266,6 +274,11 @@ void CompareAllBacteria()
 			double correlation = CompareBacteria(b[i], b[j]);
 			printf("%.20lf\n", correlation);
 		}
+
+	for (int i = 0; i < number_bacteria; i++)
+    	delete b[i];
+
+	delete[] b;
 }
 
 int main(int argc,char * argv[])
@@ -275,6 +288,10 @@ int main(int argc,char * argv[])
 	Init();
 	ReadInputFile("list.txt");
 	CompareAllBacteria();
+
+	for (int i = 0; i < number_bacteria; i++) //delete each filename string
+    	delete[] bacteria_name[i];
+	delete[] bacteria_name; //delete the array of filename pointers
 
 	time_t t2 = time(NULL);
 	printf("time elapsed: %lld seconds\n", t2 - t1); 
