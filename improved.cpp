@@ -274,6 +274,9 @@ void CompareAllBacteria()
     const auto preparation_start = Clock::now();
 
     // Stage 1: prepare each dataset's composition vector
+	#ifdef _OPENMP
+	#pragma omp parallel for default(none) shared(b, bacteria_name, n) schedule(dynamic, 1)
+	#endif
     for (int i = 0; i < n; i++)
     {
         b[i] = new Bacteria(bacteria_name[i]);
