@@ -287,6 +287,12 @@ void CompareAllBacteria()
     const auto comparison_start = Clock::now();
 
     // Stage 2: calculate each unique pair
+	#ifdef _OPENMP //lets the same source still compile as a sequential program
+	#pragma omp parallel for default(none) shared(b, results, n) schedule(dynamic, 1) 
+	//parallel - ditribute outerloop iterations across threads
+	//shared - threads access the prepared vectors and result storage
+	//schedule - assigns another row to a thread when it finishes its previous row
+	#endif
     for (int i = 0; i < n - 1; i++)
     {
         for (int j = i + 1; j < n; j++)
