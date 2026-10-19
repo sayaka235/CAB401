@@ -289,20 +289,36 @@ void CompareAllBacteria()
 
     const auto comparison_start = Clock::now();
 
-    // Stage 2: calculate each unique pair
-	#ifdef _OPENMP //lets the same source still compile as a sequential program
-	#pragma omp parallel for default(none) shared(b, results, n) schedule(dynamic, 1) 
-	//parallel - ditribute outerloop iterations across threads
-	//shared - threads access the prepared vectors and result storage
-	//schedule - assigns another row to a thread when it finishes its previous row
-	#endif
+    // Build a list of every unique pair.
+	// Include this setup cost in the comparison-stage timing.
+	std::vector<int> pair_i;
+	std::vector<int> pair_j;
+
+	const int pair_count = n * (n - 1) / 2;
+
+	pair_i.reserve(pair_count);
+	pair_j.reserve(pair_count);
+
     for (int i = 0; i < n - 1; i++)
     {
         for (int j = i + 1; j < n; j++)
         {
-            results[i][j] = CompareBacteria(b[i], b[j]);
+            pair_i.push_back(i);
+        	pair_j.push_back(j);
         }
     }
+
+	// Distribute individual pairs among threads.
+	#ifdef _OPENMP
+	#pragma omp parallel for default(none) shared(b, results, pair_i, pair_j, pair_count) schedule(dynamic, 1)
+	#endif
+	for (int k = 0; k < pair_count; ++k)
+	{
+		const int i = pair_i[k];
+		const int j = pair_j[k];
+
+		results[i][j] = CompareBacteria(b[i], b[j]);
+	}
 
     const auto comparison_end = Clock::now();
 
