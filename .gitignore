@@ -5,3 +5,4 @@
 *.pdb
 *.ilk
 /baseline_serial.txt
+/.vs/
