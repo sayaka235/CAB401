@@ -9,7 +9,7 @@ This program reads protein sequences, constructs composition vectors, and calcul
 - `list.txt`: number and names of the input datasets.
 - `data/`: the 41 protein FASTA datasets used for testing.
 - `tidy.cpp`: additional original reference implementation; not used by the build instructions below.
-- `benchmark_final.cmd`: runs repeated serial and OpenMP benchmarks using 1 through 8 OpenMP threads and checks the numerical output of each run.
+- `benchmark_final.cmd`: runs repeated serial and OpenMP benchmarks using 1 through 12 OpenMP threads and checks the numerical output of each run.
 - `summarise_final.ps1`: summarises the benchmark results and calculates median execution time, speedup, and parallel efficiency.
 
 The modified implementation parallelises composition-vector preparation and pairwise comparisons. Comparison results are printed sequentially in a fixed order.
@@ -33,10 +33,11 @@ On the tested MSVC data model, composition-vector construction requires approxim
 Four concurrent construction workers therefore require approximately 3 GiB for temporary arrays alone.
 
 Test machine:
-
-- CPU: Intel Core Ultra 7 258V (2.20 GHz)
-- Installed RAM: 32.0 GB (31.5 GB usable)
-- System: 64-bit Windows, x64-based processor
+- CPU: 12th Gen Intel Core i7-1255U
+- Cores: 10
+- Logical processors: 12
+- Installed RAM: 16 GB
+- System: 64-bit Windows
 
 ## Input datasets
 
@@ -113,7 +114,7 @@ set OMP_NUM_THREADS=2
 build\final_openmp.exe > results\parallel.txt
 ```
 
-Change `OMP_NUM_THREADS` to select another thread count between 1 and 8.
+Change `OMP_NUM_THREADS` to select another thread count between 1 and 12.
 
 The terminal remains quiet while output is redirected into a file. Wait for the command prompt to return before entering the next command.
 
@@ -209,6 +210,10 @@ The benchmark tests:
 - 6 OpenMP threads,
 - 7 OpenMP threads,
 - 8 OpenMP threads.
+- 9 OpenMP threads.
+- 10 OpenMP threads.
+- 11 OpenMP threads.
+- 12 OpenMP threads.
 
 Each configuration receives one unmeasured warm-up run followed by five measured runs.
 

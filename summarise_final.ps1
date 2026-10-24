@@ -25,7 +25,7 @@ function Median {
     return $sorted[[int][math]::Floor($sorted.Count / 2)]
 }
 
-$configurations = @("serial", "1", "2", "3", "4", "5", "6", "7", "8")
+$configurations = @("serial", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
 
 $raw = @(
     foreach ($config in $configurations) {

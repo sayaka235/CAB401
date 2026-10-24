@@ -15,7 +15,7 @@ rem Warm up each configuration. These runs are not measured.
 call :run serial warmup
 if errorlevel 1 exit /b 1
 
-for %%t in (1 2 3 4 5 6 7 8) do (
+for %%t in (1 2 3 4 5 6 7 8 9 10 11 12) do (
     call :run %%t warmup
     if errorlevel 1 exit /b 1
 )
@@ -38,14 +38,14 @@ echo SUCCESS: all measured runs completed and matched the baseline.
 exit /b 0
 
 :forward
-for %%c in (serial 1 2 3 4 5 6 7 8) do (
+for %%c in (serial 1 2 3 4 5 6 7 8 9 10 11 12) do (
     call :run %%c %1
     if errorlevel 1 exit /b 1
 )
 exit /b 0
 
 :reverse
-for %%c in (8 7 6 5 4 3 2 1 serial) do (
+for %%c in (12 11 10 9 8 7 6 5 4 3 2 1 serial) do (
     call :run %%c %1
     if errorlevel 1 exit /b 1
 )
