@@ -121,63 +121,69 @@ public:
 		for (int i=0; i<M1; i++)
 			second_div_total[i] = (double)second[i] / total_plus_complement;
 
-		count = 0;
-		double* t = new double[M];
+		std::vector<double> temp_tv;
+		std::vector<long> temp_ti;
 
-		for(long i=0; i<M; i++)
+		// Store non-zero composition-vector entries directly in sparse form
+		// instead of creating and scanning a full 64-million-entry t array.
+		for (long i = 0; i < M; i++)
 		{
 			double p1 = second_div_total[i_div_aa_number];
 			double p2 = one_l_div_total[i_mod_aa_number];
 			double p3 = second_div_total[i_mod_M1];
 			double p4 = one_l_div_total[i_div_M1];
-			double stochastic =  (p1 * p2 + p3 * p4) * total_div_2;
 
-			if (i_mod_aa_number == AA_NUMBER-1)
+			double stochastic =
+				(p1 * p2 + p3 * p4) * total_div_2;
+
+			if (i_mod_aa_number == AA_NUMBER - 1)
 			{
 				i_mod_aa_number = 0;
 				i_div_aa_number++;
 			}
 			else
+			{
 				i_mod_aa_number++;
+			}
 
-			if (i_mod_M1 == M1-1)
+			if (i_mod_M1 == M1 - 1)
 			{
 				i_mod_M1 = 0;
 				i_div_M1++;
 			}
 			else
-				i_mod_M1++;
-
-			if (stochastic > EPSILON) 
 			{
-				t[i] = (vector[i] - stochastic) / stochastic;
-
-				if (t[i] != 0) //onyl stores nonzero values
-					count++;
+				i_mod_M1++;
 			}
-			else
-				t[i] = 0;
+
+			if (stochastic > EPSILON)
+			{
+				double value =
+					(vector[i] - stochastic) / stochastic;
+
+				if (value != 0.0)
+				{
+					temp_tv.push_back(value);
+					temp_ti.push_back(i);
+				}
+			}
 		}
-		
+
 		delete[] second_div_total;
 		delete[] vector;
 		delete[] second;
 
+		count = static_cast<long>(temp_tv.size());
+
 		tv = new double[count];
 		ti = new long[count];
 
-		int pos = 0;
-		for (long i=0; i<M; i++)
+		for (long i = 0; i < count; i++)
 		{
-			if (t[i] != 0)
-			{
-				tv[pos] = t[i];
-				ti[pos] = i;
-				pos++;
-			}
+			tv[i] = temp_tv[i];
+			ti[i] = temp_ti[i];
 		}
-		delete[] t;
-
+		
 		fclose (bacteria_file);
 	}
 
