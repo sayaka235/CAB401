@@ -202,7 +202,8 @@ benchmark_final.cmd
 
 The benchmark tests:
 
-- modified sequential execution,
+- the original supplied sequential implementation,
+- the modified sequential implementation,
 - 1 OpenMP thread,
 - 2 OpenMP threads,
 - 3 OpenMP threads,
@@ -243,12 +244,12 @@ results\final_summary.csv
 
 `final_summary.csv` contains median vector-preparation time, pair-comparison time, total execution time, speedup, and parallel efficiency for the sequential version and OpenMP thread counts from 1 through 8.
 
-Speedup is calculated relative to the median execution time of the modified sequential implementation.
+Speedup is calculated relative to the faster median execution time of the original sequential implementation and the modified sequential implementation.
 
 ## Performance measurements
 
 The report compares repeated runs of the modified sequential executable and the modified OpenMP executable using identical compiler optimisation settings.
 
-The original sequential source is included separately to show the implementation before changes and to demonstrate the sequential optimisation process.
+The original sequential implementation is also benchmarked to confirm that the speedup baseline represents the best measured sequential performance.
 
 Performance results, profiling results, speedup, efficiency, and analysis of the parallel implementation are presented in the accompanying report.
