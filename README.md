@@ -11,6 +11,8 @@ This program reads protein sequences, constructs composition vectors, and calcul
 - `tidy.cpp`: additional original reference implementation; not used by the build instructions below.
 - `benchmark_final.cmd`: runs repeated serial and OpenMP benchmarks using 1 through 8 OpenMP threads and checks the numerical output of each run.
 - `summarise_final.ps1`: summarises the benchmark results and calculates median execution time, speedup, and parallel efficiency.
+- `results/final_raw.csv`: saved raw measurements from the final five-run benchmark.
+- `results/final_summary.csv`: median timings, speedup, and efficiency used in the report.
 
 The modified implementation parallelises composition-vector preparation and pairwise comparisons. Comparison results are printed sequentially in a fixed order.
 
@@ -31,8 +33,6 @@ A multicore CPU is needed to benefit from multiple OpenMP threads.
 On the tested MSVC data model, each active composition-vector construction still uses large dense working arrays. The largest is the 64,000,000-entry `long` count array, which requires approximately 256 MB. Together with the 5-mer count and probability arrays, the fixed dense working arrays require approximately 294 MB per active construction worker, excluding sparse-vector storage and application overhead.
 
 The final implementation removes the previous 64,000,000-entry temporary `double` array (`t`), which previously required an additional 512 MB per active construction worker. Peak memory therefore depends on the number of concurrent workers and the size of the temporary and retained sparse vectors. The final eight-thread configuration was tested successfully on the 32 GB system described below.
-
-Eight concurrent construction workers therefore require approximately 6 GiB for temporary arrays alone.
 
 Test machine:
 
