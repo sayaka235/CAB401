@@ -28,7 +28,9 @@ VS Code can be used to edit the source. Run the compilation and execution comman
 
 A multicore CPU is needed to benefit from multiple OpenMP threads.
 
-On the tested MSVC data model, composition-vector construction requires approximately 0.75 GiB of temporary arrays per active construction worker, in addition to retained sparse vectors, application overhead, and memory needed by Windows.
+On the tested MSVC data model, each active composition-vector construction still uses large dense working arrays. The largest is the 64,000,000-entry `long` count array, which requires approximately 256 MB. Together with the 5-mer count and probability arrays, the fixed dense working arrays require approximately 294 MB per active construction worker, excluding sparse-vector storage and application overhead.
+
+The final implementation removes the previous 64,000,000-entry temporary `double` array (`t`), which previously required an additional 512 MB per active construction worker. Peak memory therefore depends on the number of concurrent workers and the size of the temporary and retained sparse vectors. The final eight-thread configuration was tested successfully on the 32 GB system described below.
 
 Eight concurrent construction workers therefore require approximately 6 GiB for temporary arrays alone.
 
@@ -37,7 +39,7 @@ Test machine:
 - CPU: Intel Core Ultra 7 258V (2.20 GHz)
 - Cores: 8
 - Logical processors: 8
-- Installed RAM: 32 GB LPDDR5 (31.5 GB usable)
+- Installed RAM: 32 GB LPDDR5X (31.5 GB usable)
 - System: 64-bit Windows
 
 ## Input datasets
@@ -137,16 +139,16 @@ The modified program reports vector-preparation time, pair-comparison time, and 
 
 ## Validate numerical output
 
-Run the modified sequential implementation:
+Run the original sequential implementation to generate the reference output:
 
 ```cmd
-build\final_serial.exe > results\serial.txt
+build\cvtree_before.exe > results\before.txt
 ```
 
-Extract its pairwise results to create the expected baseline:
+Extract its 820 pairwise results to create the expected baseline:
 
 ```cmd
-findstr /C:" -> " results\serial.txt > results\expected_pairs.txt
+findstr /C:" -> " results\before.txt > results\expected_pairs.txt
 ```
 
 Run the OpenMP implementation, for example using two threads:
@@ -187,11 +189,11 @@ Timing and progress messages are excluded from this comparison.
 
 ## Final performance benchmark
 
-Before running the benchmark, ensure that `final_serial.exe` and `final_openmp.exe` have been compiled and create the expected output file:
+Before running the benchmark, ensure that all three executables have been compiled and create the reference output from the original sequential implementation:
 
 ```cmd
-build\final_serial.exe > results\serial.txt
-findstr /C:" -> " results\serial.txt > results\expected_pairs.txt
+build\cvtree_before.exe > results\before.txt
+findstr /C:" -> " results\before.txt > results\expected_pairs.txt
 ```
 
 Run:
@@ -217,7 +219,7 @@ Each configuration receives one unmeasured warm-up run followed by five measured
 
 The execution order is reversed on alternating rounds to reduce consistent first- or last-run bias.
 
-Every run is compared against `results\expected_pairs.txt` to confirm that the parallel implementation produces the same numerical results as the modified sequential implementation.
+Every run is compared against results\expected_pairs.txt, generated from the original sequential implementation, to confirm that the modified sequential and OpenMP implementations preserve the original numerical results.
 
 A successful benchmark ends with:
 
